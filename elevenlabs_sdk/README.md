@@ -1,6 +1,6 @@
-# ElevenLabs SDK - AI Meditation Music Generation
+# ElevenLabs SDK - AI Meditation Audio Generation
 
-Generate custom meditation music, nature sounds, and transition effects using ElevenLabs' AI sound generation.
+Generate custom meditation sounds and music using ElevenLabs' AI audio generation.
 
 ## Setup
 
@@ -12,75 +12,35 @@ Generate custom meditation music, nature sounds, and transition effects using El
 
 ## Features
 
-- **Meditation Music** - Generate ambient, peaceful music from text descriptions
-- **Nature Sounds** - Create rain, ocean, forest, and other nature soundscapes
-- **Transition Sounds** - Generate bells, chimes, and bowls for meditation cues
-- **Presets** - Curated prompts for common meditation styles
+- **Sound Effects** - Generate nature sounds, bells, chimes, and ambient textures
+- **Music Generation** - Create original meditation music with the Music API (requires paid plan)
+- **Presets** - Curated prompts for common meditation sounds
 - **Session Generation** - Create complete meditation sessions with intro/outro
 
-## Usage
+## Sound Effects (example.py)
 
-### Generate Meditation Music
+Uses the Text-to-Sound-Effects API to generate meditation sounds.
+
+### Generate Nature Sounds
 
 ```python
 from elevenlabs_sdk import MeditationGenerator
 
 generator = MeditationGenerator()
 
-# Generate custom meditation music
-audio = generator.generate_meditation_music(
-    prompt="gentle piano with soft synthesizer pads, peaceful morning",
-    duration_seconds=300  # 5 minutes
-)
-
-# Save to file
-audio.save("morning_meditation.mp3")
-
-# Or get raw bytes for streaming
-audio_bytes = audio.get_bytes()
-```
-
-### Generate Nature Sounds
-
-```python
 # Rain sounds
 rain = generator.generate_nature_sound(
-    description="gentle rain on a tin roof",
-    duration_seconds=600
+    description="gentle rain on leaves",
+    duration_seconds=60
 )
 rain.save("rain.mp3")
 
 # Ocean waves
 ocean = generator.generate_nature_sound(
-    description="calm ocean waves on a tropical beach",
-    duration_seconds=600
+    description="calm ocean waves on a sandy beach",
+    duration_seconds=60
 )
 ocean.save("ocean.mp3")
-```
-
-### Use Presets
-
-Curated prompts optimized for meditation:
-
-```python
-# List available presets
-presets = generator.list_presets()
-# {
-#   'morning_meditation': 'Peaceful piano for morning meditation',
-#   'deep_relaxation': 'Deep ambient drones for relaxation',
-#   'nature_rain': 'Gentle rain for focus and sleep',
-#   'ocean_waves': 'Ocean waves for relaxation',
-#   'forest_morning': 'Forest sounds with birdsong',
-#   'tibetan_bowls': 'Singing bowls and bells',
-#   'breathing_guide': 'Rhythmic tones for breath pacing',
-#   'sleep_music': 'Ultra-soft music for sleep'
-# }
-
-# Generate from preset
-audio = generator.generate_from_preset(
-    preset="deep_relaxation",
-    duration_seconds=600
-)
 ```
 
 ### Generate Transition Sounds
@@ -96,27 +56,72 @@ bell = generator.generate_transition_sound(
 bell.save("session_start.mp3")
 ```
 
-### Generate Complete Sessions
-
-Create intro, main, and outro in one call:
+### Use Sound Presets
 
 ```python
-session = generator.generate_session(
-    intro_seconds=30,
-    main_seconds=600,
-    outro_seconds=30,
-    main_prompt="peaceful ambient music with soft nature sounds"
+# List available presets
+presets = generator.list_presets()
+# Includes: nature_rain, ocean_waves, forest_morning, tibetan_bowls, etc.
+
+# Generate from preset
+audio = generator.generate_from_preset(
+    preset="ocean_waves",
+    duration_seconds=60
 )
-
-# Save each part
-session['intro'].save("session_intro.mp3")
-session['main'].save("session_main.mp3")
-session['outro'].save("session_outro.mp3")
-
-print(f"Total duration: {session['total_duration']} seconds")
+audio.save("ocean.mp3")
 ```
 
-### Working with Audio Data
+## Music Generation (example_music.py)
+
+Uses the new ElevenLabs Music API to generate original meditation music. Requires a paid ElevenLabs plan.
+
+### Generate Music from Prompts
+
+```python
+from elevenlabs import ElevenLabs
+
+client = ElevenLabs(api_key="your_key")
+
+# Generate meditation music
+audio_data = client.music.compose(
+    prompt="peaceful ambient meditation music with soft piano, slow tempo",
+    music_length_ms=60000,  # 60 seconds
+    model_id="music_v1",
+    force_instrumental=True,  # No vocals
+)
+
+# Save the streamed audio
+with open("meditation.mp3", "wb") as f:
+    for chunk in audio_data:
+        f.write(chunk)
+```
+
+### Music API Parameters
+
+| Parameter | Description |
+|-----------|-------------|
+| `prompt` | Text description of the music to generate |
+| `music_length_ms` | Duration in milliseconds (3000-300000) |
+| `model_id` | Use `"music_v1"` |
+| `force_instrumental` | Set `True` to ensure no vocals |
+
+### Example Music Prompts
+
+```python
+# Deep relaxation
+"deep ambient drone, warm synthesizer pads, evolving textures, no rhythm"
+
+# Morning meditation
+"gentle acoustic guitar and flute, peaceful sunrise atmosphere, hopeful"
+
+# Focus music
+"soft lo-fi piano, minimal ambient, calm and focused"
+
+# Sleep music
+"extremely soft ambient tones, barely audible, warm frequencies"
+```
+
+## Working with Generated Audio
 
 ```python
 # Save to file
@@ -139,28 +144,15 @@ print(f"Duration: {audio.duration_seconds}s")
 2. **Specify mood** - Include words like "peaceful", "calm", "gentle"
 3. **Mention instruments** - "soft piano", "ambient synthesizer", "tibetan bowls"
 4. **Avoid rhythm for relaxation** - Add "no beat" or "no rhythm" for deeper meditation
-5. **Layer sounds** - Combine music and nature sounds in prompts
 
-### Example Prompts
+## Examples
 
-```python
-# Deep relaxation
-"extremely slow ambient drones, warm evolving pads, no rhythm, hypnotic"
-
-# Focus session
-"soft lo-fi piano with gentle rain, minimal, focused"
-
-# Sleep music
-"barely audible ambient tones, soft warm frequencies, perfect for sleep"
-
-# Nature meditation
-"forest stream with distant bird songs, morning sunlight atmosphere"
-```
-
-## Example
-
-Run the example to generate sample meditation music:
-
+Run the sound effects demo:
 ```bash
 uv run python elevenlabs_sdk/example.py
+```
+
+Run the music generation demo:
+```bash
+uv run python elevenlabs_sdk/example_music.py
 ```
