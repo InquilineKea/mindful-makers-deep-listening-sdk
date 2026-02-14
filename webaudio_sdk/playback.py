@@ -1,7 +1,11 @@
 """Audio playback and export utilities."""
 
 import numpy as np
-import sounddevice as sd
+try:
+    import sounddevice as sd
+    HAS_SOUNDDEVICE = True
+except OSError:
+    HAS_SOUNDDEVICE = False
 import soundfile as sf
 
 
@@ -17,6 +21,8 @@ def play_audio(
         sample_rate: Sample rate in Hz
         blocking: If True, wait for playback to complete
     """
+    if not HAS_SOUNDDEVICE:
+        raise RuntimeError("sounddevice is not available. PortAudio library is required for playback.")
     sd.play(audio, sample_rate)
     if blocking:
         sd.wait()
@@ -24,6 +30,8 @@ def play_audio(
 
 def stop_playback() -> None:
     """Stop any currently playing audio."""
+    if not HAS_SOUNDDEVICE:
+        raise RuntimeError("sounddevice is not available. PortAudio library is required for playback.")
     sd.stop()
 
 
@@ -48,6 +56,9 @@ def get_audio_devices() -> dict:
     Returns:
         Dict with 'input' and 'output' device lists
     """
+    if not HAS_SOUNDDEVICE:
+        raise RuntimeError("sounddevice is not available. PortAudio library is required for device detection.")
+    
     devices = sd.query_devices()
     input_devices = []
     output_devices = []
